@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Asistencia — Física IED Los Rosales</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1a5fa8;--blue-d:#134a87;--blue-light:#e6f1fb;
+  --green:#2e7d32;--green-btn:#43a047;--green-light:#e8f5e9;
+  --red:#c62828;--red-btn:#e53935;--red-light:#ffebee;
+  --amber:#e65100;--amber-btn:#fb8c00;--amber-light:#fff3e0;
+  --gray:#546e7a;--gray-light:#f0f4f8;--border:#e0e0e0;
+  --text:#212121;--text-muted:#757575;--white:#fff;
+  --radius:10px;--shadow:0 2px 8px rgba(0,0,0,.12)
+}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',sans-serif;background:#eceff1;color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent}
+
+/* ── HEADER ── */
+.header{background:var(--blue);color:white;padding:14px 14px 0;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.header-left .school{font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.06em;margin-bottom:1px}
+.header-left .title{font-size:19px;font-weight:800}
+.header-actions{display:flex;align-items:center;gap:6px}
+.icon-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:8px;color:white;padding:6px 10px;font-size:13px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;white-space:nowrap}
+.icon-btn:active{opacity:.7}
+
+/* date row */
+.date-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+input[type=date]{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:7px;color:white;padding:5px 9px;font-size:13px;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;outline:none}
+input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.8;cursor:pointer}
+.day-label{font-size:12px;opacity:.75}
+.save-toast{margin-left:auto;background:rgba(255,255,255,.2);border-radius:20px;padding:3px 10px;font-size:11px;opacity:0;transition:opacity .3s;white-space:nowrap}
+.save-toast.show{opacity:1}
+
+/* ── COURSE TABS ── */
+.tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;padding:0 0 10px}
+.tab{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:7px;color:rgba(255,255,255,.8);font-size:13px;font-weight:700;font-family:'Nunito',sans-serif;padding:7px 2px;cursor:pointer;text-align:center;transition:all .15s;position:relative}
+.tab:active{transform:scale(.95)}
+.tab.active{background:white;color:var(--blue);border-color:white}
+.tab .dot{display:inline-block;width:6px;height:6px;border-radius:50%;position:absolute;top:5px;right:5px;background:#43a047;opacity:0}
+.tab.has-data .dot{opacity:1}
+
+/* ── SUMMARY ── */
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 10px 6px}
+.stat-card{background:white;border-radius:var(--radius);padding:8px 4px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+.stat-num{font-size:22px;font-weight:800;line-height:1}
+.stat-label{font-size:9px;color:var(--text-muted);margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
+.stat-P .stat-num{color:var(--green)}.stat-A .stat-num{color:var(--red)}
+.stat-T .stat-num{color:var(--amber)}.stat-X .stat-num{color:var(--gray)}
+
+/* progress */
+.progress-wrap{padding:0 10px 8px}
+.progress-bar{height:5px;background:#e0e0e0;border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;background:var(--green-btn);border-radius:99px;transition:width .3s}
+.progress-label{font-size:10px;color:var(--text-muted);margin-top:3px;text-align:right}
+
+/* ── ACTIONS ── */
+.actions{display:flex;gap:6px;padding:0 10px 10px;flex-wrap:wrap}
+.btn{border:none;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;transition:opacity .15s,transform .1s;white-space:nowrap}
+.btn:active{transform:scale(.96);opacity:.85}
+.btn-green{background:var(--green-light);color:var(--green);flex:1}
+.btn-gray{background:var(--gray-light);color:var(--gray)}
+.btn-blue{background:var(--blue-light);color:var(--blue)}
+.btn-sheets{background:#e8f5e9;color:#2e7d32;flex:1;display:flex;align-items:center;justify-content:center;gap:4px}
+.btn-sheets svg{width:14px;height:14px;flex-shrink:0}
+
+/* ── STUDENT LIST ── */
+.list{padding:0 10px 20px;display:flex;flex-direction:column;gap:5px}
+.student-row{display:flex;align-items:center;gap:8px;background:white;border-radius:var(--radius);padding:10px 10px;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:background .2s}
+.student-row.marked-A{background:#fff5f5}
+.student-row.marked-T{background:#fff8f0}
+.student-num{font-size:11px;color:var(--text-muted);min-width:20px;text-align:right;font-weight:700}
+.student-name{flex:1;font-size:13px;line-height:1.25;font-weight:600;color:var(--text)}
+.student-name.absent{color:var(--red)}
+.student-name.tardy{color:var(--amber)}
+.status-btns{display:flex;gap:4px}
+.status-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid transparent;font-size:12px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.status-btn:active{transform:scale(.85)}
+.btn-P{background:var(--green-light);color:var(--green-btn);border-color:#a5d6a7}
+.btn-P.active{background:var(--green-btn);color:white;border-color:var(--green-btn)}
+.btn-A{background:var(--red-light);color:var(--red-btn);border-color:#ef9a9a}
+.btn-A.active{background:var(--red-btn);color:white;border-color:var(--red-btn)}
+.btn-T{background:var(--amber-light);color:var(--amber-btn);border-color:#ffcc80}
+.btn-T.active{background:var(--amber-btn);color:white;border-color:var(--amber-btn)}
+
+/* ── MODALS ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
+.overlay.show{display:flex}
+.sheet{background:white;border-radius:16px 16px 0 0;padding:20px 20px 36px;width:100%;max-width:560px}
+.sheet h3{font-size:17px;font-weight:800;margin-bottom:4px}
+.sheet p{font-size:13px;color:var(--text-muted);margin-bottom:14px;line-height:1.5}
+.modal-btns{display:flex;flex-direction:column;gap:8px}
+.modal-btn{padding:13px;border:none;border-radius:var(--radius);font-size:14px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer}
+.modal-btn:active{opacity:.8}
+.mbtn-green{background:var(--green-light);color:var(--green)}
+.mbtn-sheets{background:#e8f5e9;color:#2e7d32}
+.mbtn-csv{background:var(--blue-light);color:var(--blue)}
+.mbtn-cancel{background:var(--gray-light);color:var(--gray)}
+.mbtn-save{background:var(--blue);color:white}
+
+/* Settings */
+.settings-label{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px;display:block}
+.settings-input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;font-family:'Nunito',sans-serif;color:var(--text);outline:none;margin-bottom:12px}
+.settings-input:focus{border-color:var(--blue)}
+.settings-hint{font-size:11px;color:var(--text-muted);line-height:1.6;margin-bottom:14px;background:var(--gray-light);border-radius:7px;padding:10px 12px}
+.settings-hint code{background:#e0e0e0;border-radius:4px;padding:1px 4px;font-size:11px}
+
+/* ── TOAST NOTIFICATION ── */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#323232;color:white;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.toast.success{background:#2e7d32}
+.toast.error{background:#c62828}
+
+.footer-note{text-align:center;font-size:10px;color:var(--text-muted);padding:0 10px 20px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="header-left">
+      <div class="school">I.E.D. Los Rosales — Física 2026</div>
+      <div class="title">Registro de Asistencia</div>
+    </div>
+    <div class="header-actions">
+      <div class="save-toast" id="saveBadge">Guardado ✓</div>
+      <button class="icon-btn" onclick="openSettings()">⚙ Config</button>
+    </div>
+  </div>
+  <div class="date-row">
+    <input type="date" id="dateInput">
+    <span class="day-label" id="dayLabel"></span>
+  </div>
+  <div class="tabs" id="courseTabs"></div>
+</div>
+
+<!-- SUMMARY -->
+<div class="summary">
+  <div class="stat-card stat-P"><div class="stat-num" id="cntP">0</div><div class="stat-label">Presentes</div></div>
+  <div class="stat-card stat-A"><div class="stat-num" id="cntA">0</div><div class="stat-label">Ausentes</div></div>
+  <div class="stat-card stat-T"><div class="stat-num" id="cntT">0</div><div class="stat-label">Tardanzas</div></div>
+  <div class="stat-card stat-X"><div class="stat-num" id="cntX">—</div><div class="stat-label">Sin marcar</div></div>
+</div>
+<div class="progress-wrap">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="progress-label" id="progressLabel">0 registrados</div>
+</div>
+
+<!-- ACTIONS -->
+<div class="actions">
+  <button class="btn btn-green" onclick="markAll('P')">✓ Todos presentes</button>
+  <button class="btn btn-gray" onclick="resetDay()">↺ Limpiar</button>
+  <button class="btn btn-sheets" onclick="openExport()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="12 2 12 8 18 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    Guardar / Exportar
+  </button>
+</div>
+
+<!-- STUDENT LIST -->
+<div class="list" id="studentList"></div>
+<div class="footer-note">Toca <strong>P</strong> = Presente &nbsp;·&nbsp; <strong>A</strong> = Ausente &nbsp;·&nbsp; <strong>T</strong> = Tardanza<br>Toca de nuevo el mismo botón para desmarcar &nbsp;·&nbsp; Guardado automático</div>
+
+<!-- EXPORT MODAL -->
+<div class="overlay" id="exportModal" onclick="if(event.target===this)closeExport()">
+  <div class="sheet">
+    <h3>Guardar / Exportar asistencia</h3>
+    <p id="exportInfo">Selecciona una opción.</p>
+    <div class="modal-btns">
+      <button class="modal-btn mbtn-sheets" onclick="sendToSheets()">
+        Enviar a Google Sheets
+      </button>
+      <button class="modal-btn mbtn-csv" onclick="exportCSV()">Descargar CSV</button>
+      <button class="modal-btn mbtn-cancel" onclick="closeExport()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="overlay" id="settingsModal" onclick="if(event.target===this)closeSettings()">
+  <div class="sheet">
+    <h3>⚙ Configuración</h3>
+    <p>Pega aquí la URL de tu Google Apps Script Web App para enviar asistencia a Google Sheets.</p>
+    <label class="settings-label">URL del Apps Script Web App</label>
+    <input class="settings-input" type="url" id="sheetsUrl" placeholder="https://script.google.com/macros/s/…/exec">
+    <div class="settings-hint">
+      <strong>Cómo configurar (una sola vez):</strong><br>
+      1. Abre <code>script.google.com</code> → Nuevo proyecto<br>
+      2. Pega el código Apps Script (incluido abajo)<br>
+      3. Implementar → Nueva implementación → Web App<br>
+      4. Ejecutar como: <em>Yo</em> · Acceso: <em>Cualquier persona</em><br>
+      5. Copia la URL generada y pégala aquí
+    </div>
+    <label class="settings-label">PIN de acceso (para exportar)</label>
+    <input class="settings-input" type="password" id="pinInput" placeholder="4 dígitos (ej: 1234)" maxlength="4">
+    <div class="modal-btns">
+      <button class="modal-btn mbtn-save" onclick="saveSettings()">Guardar configuración</button>
+      <button class="modal-btn mbtn-cancel" onclick="closeSettings()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN VERIFY MODAL -->
+<div class="overlay" id="pinModal" onclick="if(event.target===this)closePinModal()">
+  <div class="sheet">
+    <h3>🔒 Verificar PIN</h3>
+    <p>Ingresa el PIN del docente para continuar.</p>
+    <input class="settings-input" type="password" id="pinVerify" placeholder="PIN" maxlength="4" style="font-size:22px;text-align:center;letter-spacing:8px">
+    <div class="modal-btns">
+      <button class="modal-btn mbtn-save" onclick="verifyPin()">Continuar</button>
+      <button class="modal-btn mbtn-cancel" onclick="closePinModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STUDENT DATA ───────────────────────────────────────────────
+const COURSES = {
+  "10A":{"label":"10°A","count":30,"students":[{mat:4350,num:1,name:"Acosta Rodriguez Valentina"},{mat:4204,num:2,name:"Arrieta Ferrer Kemberlin Saray"},{mat:4050,num:3,name:"Avila Correa Valentina"},{mat:5577,num:4,name:"Borjas Hinestroza Michell Anais"},{mat:8017,num:5,name:"Campo Hernandez Angel David"},{mat:6787,num:6,name:"Caro Rodriguez Daniel Alberto"},{mat:3982,num:7,name:"Coronado Atencia Erick David"},{mat:6804,num:8,name:"Correa Barcelo Dulyana Ster"},{mat:4045,num:9,name:"Cueto Corrales Johelys Maireth"},{mat:4042,num:10,name:"Donado Acosta Angel David"},{mat:4763,num:11,name:"Escorce Rojas Tomas Jafed"},{mat:6803,num:12,name:"Gonzalez Almanza Yosimar Valentina"},{mat:8047,num:13,name:"Gonzalez Berruecos Jeymison"},{mat:6822,num:14,name:"Henao Guerrero Shirley Paola"},{mat:4062,num:15,name:"Lozano Cantillo Sabastian Enrique"},{mat:4190,num:16,name:"Maldonado Martinez Jhoan Sebastian"},{mat:8430,num:17,name:"Manzur Severiche Griselis Yaneth"},{mat:4174,num:18,name:"Marriaga Soraca Sheyla Karolina"},{mat:5918,num:19,name:"Monterroza Infante Julieta Sofia"},{mat:6793,num:20,name:"Murillo de Varona Dainer Andres"},{mat:8111,num:21,name:"Naranjo Ojeda Gerson Steven"},{mat:4065,num:22,name:"Ocampo Niebles Erick Jose"},{mat:8078,num:23,name:"Ortiz Borja Karina Marcela"},{mat:8062,num:24,name:"Pineda Colina Belmaris Victoria"},{mat:4205,num:25,name:"Portillo Cervantes Nicool Ariadnet"},{mat:6826,num:26,name:"Quintana Bolivar Esneider"},{mat:4769,num:27,name:"Ruiz Fernandez Yibran Daniel"},{mat:5156,num:28,name:"Salas Gonzalez Genesis Carolina"},{mat:5412,num:29,name:"Simanca Osorio Valentina"},{mat:5438,num:30,name:"Sosa Jimenez Emiro Ricardo"}]},
+  "10B":{"label":"10°B","count":29,"students":[{mat:4406,num:1,name:"Ariza Barreto Valery Sofia"},{mat:8540,num:2,name:"Blanco Garzon Dilan Andres"},{mat:4053,num:3,name:"Centeno Garay Kary Luz"},{mat:7768,num:4,name:"Coba Arrieta Sebastian Junior"},{mat:6621,num:5,name:"Correa Chavez Ivanna"},{mat:4887,num:6,name:"Escobar Liñan Valentina"},{mat:7854,num:7,name:"Jimenez Chirinos Jose Ramon"},{mat:6770,num:8,name:"Julio Urbiña Karoll Michell"},{mat:6181,num:9,name:"Macias Nuñez Emily Patricia"},{mat:6784,num:10,name:"Marquez Camargo Maira Patricia"},{mat:6758,num:11,name:"Martinez Liñan Heelen Sofia"},{mat:6759,num:12,name:"Martinez Liñan Heidy Sofia"},{mat:7743,num:13,name:"Mendoza Fonseca Laura Vanessa"},{mat:6781,num:14,name:"Mendoza Garcia Jose Luis"},{mat:6566,num:15,name:"Meriño Maza Miguel Andres"},{mat:8079,num:16,name:"Montaño Tous Maria Camila"},{mat:4583,num:17,name:"Oliveros Garay Angel David"},{mat:8611,num:18,name:"Polo Polo Elizabeth"},{mat:7787,num:19,name:"Puello Cortina Juan Sebastian"},{mat:6633,num:20,name:"Reyes Sandoval Alejandro Enrique"},{mat:5817,num:21,name:"Ruiz Ramirez Jorge Andres"},{mat:7725,num:22,name:"Salcedo Mercado Sebastian Andres"},{mat:4238,num:23,name:"Santamaria Alvarino Scarlett Dayana"},{mat:8587,num:24,name:"Suarez Diaz Yairis Marcela"},{mat:8104,num:25,name:"Torres Dominguez Samuel Matias"},{mat:8499,num:26,name:"Tovar Ramirez Jeiger Martin"},{mat:3583,num:27,name:"Velasquez Diaz Danna Valentina"},{mat:5570,num:28,name:"Villalobos Masias Franyelis Carolina"},{mat:6825,num:29,name:"Villarreal Echeverri Juan David"}]},
+  "10C":{"label":"10°C","count":30,"students":[{mat:8689,num:1,name:"Blanco Valencia Alejandro David"},{mat:7788,num:2,name:"Caballero Galvis Eliana"},{mat:8185,num:3,name:"Campo Perez Milaynis Patricia"},{mat:8195,num:4,name:"Caridad Lopez Deliana Milena"},{mat:5778,num:5,name:"Carval Bermudez Nicolas Junior"},{mat:8201,num:6,name:"Duran Moreno Angela Isabel"},{mat:7692,num:7,name:"Epieyu Eliecer Saul"},{mat:8681,num:8,name:"Gonzalez Morales Maria Camila"},{mat:4221,num:9,name:"Ibañez Becerra Yarleidys Sofia"},{mat:5846,num:10,name:"Julio Arteaga Carlos Andres"},{mat:8528,num:11,name:"Llanos Pacheco Heylin Andrea"},{mat:4422,num:12,name:"Llanos Pacheco Keiner Andres"},{mat:6812,num:13,name:"Mercado Ramos Didier David"},{mat:7717,num:14,name:"Miranda Rodriguez Neylis Patricia"},{mat:8113,num:15,name:"Molina Oyola Brayan Jose"},{mat:7835,num:16,name:"Montenegro Ferrer Sebastian Enrique"},{mat:6789,num:17,name:"Montiel Peña Thaliana"},{mat:3724,num:18,name:"Muñoz Sanchez Nicol Andrea"},{mat:6544,num:19,name:"Orozco Perez Stevan Jose"},{mat:8081,num:20,name:"Palmera Villegas Camilo Andres"},{mat:8616,num:21,name:"Perez de Avila Jose Jorge"},{mat:3981,num:22,name:"Rodriguez Rojas Liz Maria"},{mat:7727,num:23,name:"Rodriguez Rojas Yurani"},{mat:8214,num:24,name:"Rojas Gonzalez Fanor Samuel"},{mat:8617,num:25,name:"Salgado Guete Valeria Yulieth"},{mat:8494,num:26,name:"Sierra Santamaria Elisabet"},{mat:8685,num:27,name:"Solano Reyes Yeison Andres"},{mat:4090,num:28,name:"Valencia Lucumi Sarai Alejandra"},{mat:7736,num:29,name:"Vasquez Martinez Fabricio Matias"},{mat:6620,num:30,name:"Ventura Navarro Cristina Isabel"}]},
+  "11A":{"label":"11°A","count":28,"students":[{mat:3600,num:1,name:"Alvarado Monterosa Elainis Andrea"},{mat:3236,num:2,name:"Barros Molina Eileen Dayana"},{mat:3605,num:3,name:"Bellio Ahumada Sheiry Paola"},{mat:3579,num:4,name:"Caballero Castro Jordan Ivan"},{mat:5390,num:5,name:"Castilla Torres Marcela"},{mat:4759,num:6,name:"Castro Paternina Jesus Manuel"},{mat:3220,num:7,name:"Chavez Cardenas Angel David"},{mat:6776,num:8,name:"Crespo Atencio Tifany Andrea"},{mat:4349,num:9,name:"Duncan Barreto Rafael Jose"},{mat:8285,num:10,name:"Galezzo Piedrahita Jesus David"},{mat:5445,num:11,name:"Garces Alvarez Jesus Emanuel"},{mat:5836,num:12,name:"Gomez Gomez Victor Alfonso"},{mat:3590,num:13,name:"Gomez Rodelo Elisa"},{mat:3575,num:14,name:"Jaramillo Bula Sheryl Dayana"},{mat:3576,num:15,name:"Luna Padilla Keirin Juliana"},{mat:3184,num:16,name:"Marquez Camargo Yuleinis Paola"},{mat:3189,num:17,name:"Martinez Morales Karina Patricia"},{mat:3283,num:18,name:"Nieto Sanchez Darcy Dayana"},{mat:4284,num:19,name:"Pacheco Salas Guvana Milena"},{mat:4803,num:20,name:"Peña Beltran Maria Jose"},{mat:6773,num:21,name:"Ramos Reales Gabriel Enrique"},{mat:7499,num:22,name:"Rey Villanova Henry Alexander"},{mat:4529,num:23,name:"Rodriguez Bello Mariana Valentina"},{mat:4389,num:24,name:"Rodriguez de la Hoz Juan David"},{mat:6755,num:25,name:"Suarez Cumplido Francisco Javier"},{mat:7816,num:26,name:"Suarez Cumplido Santiago Alfonso"},{mat:3608,num:27,name:"Trejo Rodriguez Eva Sandrid"},{mat:3785,num:28,name:"Viloria Borja Natalia"}]},
+  "11B":{"label":"11°B","count":28,"students":[{mat:3157,num:1,name:"Ariza de la Matta Loinner de Jesus"},{mat:4001,num:2,name:"Barcelo Ramirez Kener David"},{mat:6284,num:3,name:"Calvo Rivera Dana Marcela"},{mat:5388,num:4,name:"Cardona Baza Jose Gabriel"},{mat:6796,num:5,name:"Castillo Rodriguez Sharith Paola"},{mat:3903,num:6,name:"Castrillon Belilla Zamara"},{mat:3154,num:7,name:"Cervantes Ramirez Maria Jose"},{mat:3824,num:8,name:"Colon Rodriguez Hendrick Jose"},{mat:6806,num:9,name:"Coronado Berrio Maillys Yuseph"},{mat:6767,num:10,name:"Galera Gonzalez Carolay Esther"},{mat:7869,num:11,name:"Galvis Mozo Angel David"},{mat:7288,num:12,name:"Gonzalez Rodriguez Eimy Dayana"},{mat:4980,num:13,name:"Liñan Avila Carolina Isabel"},{mat:3577,num:14,name:"Mendoza de la Hoz Yoelis"},{mat:4443,num:15,name:"Orozco Perez Genesis Elianis"},{mat:3896,num:16,name:"Padilla Sanchez Valeria Sofia"},{mat:6811,num:17,name:"Palma Rangel Keiner David"},{mat:6799,num:18,name:"Perez Valencia Juan Jose"},{mat:5571,num:19,name:"Pissiotti Palacio Valeria"},{mat:7339,num:20,name:"Rodriguez Atencia Paula Andrea"},{mat:4351,num:21,name:"Rodriguez Herrera Alexander"},{mat:3613,num:22,name:"Rodriguez Pedroza Jose Miguel"},{mat:6778,num:23,name:"Romero Viloria Diego Andres"},{mat:5464,num:24,name:"Sandoval Ferrer Duberlis Andrea"},{mat:8236,num:25,name:"Sierra Cardenas Darwin Jose"},{mat:3629,num:26,name:"Sosa Quintana Luis Miguel"},{mat:2775,num:27,name:"Suarez Garcia Mariana Isabel"},{mat:3795,num:28,name:"Valdez de la Cruz Nazari Andrea"}]},
+  "11C":{"label":"11°C","count":29,"students":[{mat:4905,num:1,name:"Ballestas Blanco Victor Ivan"},{mat:6403,num:2,name:"Betancourt Ruiz Jesus Gabriel"},{mat:5135,num:3,name:"Camacho Vides Keyler Jhoan"},{mat:3584,num:4,name:"Castillo Mercado Ivan Andres"},{mat:6819,num:5,name:"Castro Montaña Jorge David"},{mat:6619,num:6,name:"Corrales Alvarez Fernando Jesus"},{mat:8035,num:7,name:"De la Cruz Pertuz Adriana Carolina"},{mat:3783,num:8,name:"Fuentes Meza Maria Sofia"},{mat:3666,num:9,name:"Fuentes Sosa Jaidis Michel"},{mat:3843,num:10,name:"Gonzalez de la Cruz Jesus Manuel"},{mat:4147,num:11,name:"Henao Ortega Isaac David"},{mat:6948,num:12,name:"Jaramillo Bula Saskia Marcela"},{mat:8497,num:13,name:"Leon Alvarez Shayreth Fernanda"},{mat:6816,num:14,name:"Lopez Nuñez Danna Sofia"},{mat:4254,num:15,name:"Lopez Rojas Maria Alejandra"},{mat:3647,num:16,name:"Martinez Olivarez Leixy Thays"},{mat:5779,num:17,name:"Montenegro Lopez Yostin David"},{mat:3591,num:18,name:"Montero Vasquez Alex Smit"},{mat:6814,num:19,name:"Munive Rivera Selene Andrea"},{mat:5784,num:20,name:"Ortega Garcia Zaireth"},{mat:3607,num:21,name:"Palomino Barreto Camilo Andres"},{mat:3651,num:22,name:"Peluffo Solano Jireth Paola"},{mat:6210,num:23,name:"Ramos Ojeda Viviana Sofia"},{mat:3601,num:24,name:"Rey Rodriguez Sheril Sofia"},{mat:6117,num:25,name:"Rodriguez de la Hoz Ashley Sharith"},{mat:3595,num:26,name:"Rua de Avila Yeremis David"},{mat:3821,num:27,name:"Suarez Cantillo Yulianis Mared"},{mat:3589,num:28,name:"Torres Taborda Alexander"},{mat:3679,num:29,name:"Yepes Mejia Neider David"}]}
+};
+const DAYS=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const COURSE_ORDER=["10A","10B","10C","11A","11B","11C"];
+
+// ─── STATE ──────────────────────────────────────────────────────
+let records={};        // {courseKey: {date: {mat: status}}}
+let currentCourse='10A';
+let currentDate='';
+let pendingAction=null; // 'sheets' or 'csv' — stored while PIN dialog open
+
+// ─── STORAGE ────────────────────────────────────────────────────
+function loadData(){
+  try{const s=localStorage.getItem('fisica-ied-rosales');if(s)records=JSON.parse(s);}catch(e){records={};}
+}
+function saveData(){
+  try{
+    localStorage.setItem('fisica-ied-rosales',JSON.stringify(records));
+    const b=document.getElementById('saveBadge');
+    b.classList.add('show');
+    clearTimeout(b._t);
+    b._t=setTimeout(()=>b.classList.remove('show'),1800);
+  }catch(e){}
+}
+function getSettings(){
+  try{return JSON.parse(localStorage.getItem('fisica-settings')||'{}');}catch(e){return{};}
+}
+function saveSettings(){
+  const url=document.getElementById('sheetsUrl').value.trim();
+  const pin=document.getElementById('pinInput').value.trim();
+  if(pin&&pin.length<4){showToast('El PIN debe tener 4 dígitos','error');return;}
+  const s=getSettings();
+  s.sheetsUrl=url;
+  if(pin) s.pin=pin;
+  localStorage.setItem('fisica-settings',JSON.stringify(s));
+  closeSettings();
+  showToast('Configuración guardada ✓','success');
+}
+
+// ─── COURSE TABS ────────────────────────────────────────────────
+function buildTabs(){
+  const c=document.getElementById('courseTabs');
+  c.innerHTML='';
+  COURSE_ORDER.forEach(key=>{
+    const btn=document.createElement('button');
+    btn.className='tab'+(key===currentCourse?' active':'');
+    btn.id='tab-'+key;
+    const hasData=records[key]&&Object.keys(records[key]).length>0;
+    if(hasData) btn.classList.add('has-data');
+    btn.innerHTML=COURSES[key].label+'<span class="dot"></span>';
+    btn.onclick=()=>switchCourse(key);
+    c.appendChild(btn);
+  });
+}
+function switchCourse(key){
+  currentCourse=key;
+  buildTabs();
+  renderList();
+  updateSummary();
+}
+
+// ─── ATTENDANCE LOGIC ───────────────────────────────────────────
+function dayRec(){
+  if(!records[currentCourse]) records[currentCourse]={};
+  if(!records[currentCourse][currentDate]) records[currentCourse][currentDate]={};
+  return records[currentCourse][currentDate];
+}
+function setStatus(mat,status){
+  const r=dayRec();
+  if(r[mat]===status) delete r[mat]; else r[mat]=status;
+  saveData(); renderList(); updateSummary(); buildTabs();
+}
+function markAll(st){
+  const r=dayRec();
+  COURSES[currentCourse].students.forEach(s=>r[s.mat]=st);
+  saveData(); renderList(); updateSummary(); buildTabs();
+}
+function resetDay(){
+  if(confirm('¿Limpiar toda la asistencia de '+COURSES[currentCourse].label+' para este día?')){
+    if(records[currentCourse]) records[currentCourse][currentDate]={};
+    saveData(); renderList(); updateSummary(); buildTabs();
+  }
+}
+
+// ─── SUMMARY ────────────────────────────────────────────────────
+function updateSummary(){
+  const day=dayRec();
+  const n=COURSES[currentCourse].count;
+  let P=0,A=0,T=0;
+  COURSES[currentCourse].students.forEach(s=>{
+    const st=day[s.mat];
+    if(st==='P')P++;else if(st==='A')A++;else if(st==='T')T++;
+  });
+  const X=n-P-A-T, total=P+A+T;
+  document.getElementById('cntP').textContent=P;
+  document.getElementById('cntA').textContent=A;
+  document.getElementById('cntT').textContent=T;
+  document.getElementById('cntX').textContent=X;
+  const pct=Math.round((total/n)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressLabel').textContent=
+    total+' de '+n+' registrados ('+pct+'%)  —  '+COURSES[currentCourse].label;
+}
+
+// ─── RENDER LIST ────────────────────────────────────────────────
+function renderList(){
+  const day=dayRec();
+  const c=document.getElementById('studentList');
+  c.innerHTML='';
+  COURSES[currentCourse].students.forEach(s=>{
+    const st=day[s.mat]||'';
+    const row=document.createElement('div');
+    row.className='student-row'+(st==='A'?' marked-A':st==='T'?' marked-T':'');
+    row.innerHTML=
+      `<span class="student-num">${s.num}</span>`+
+      `<span class="student-name${st==='A'?' absent':st==='T'?' tardy':''}">${s.name}</span>`+
+      `<div class="status-btns">`+
+      ['P','A','T'].map(x=>
+        `<button class="status-btn btn-${x}${st===x?' active':''}" onclick="setStatus(${s.mat},'${x}')">${x}</button>`
+      ).join('')+
+      `</div>`;
+    c.appendChild(row);
+  });
+}
+
+// ─── DATE ───────────────────────────────────────────────────────
+function setDate(d){
+  currentDate=d;
+  const dt=new Date(d+'T12:00:00');
+  document.getElementById('dayLabel').textContent=DAYS[dt.getDay()];
+  renderList(); updateSummary();
+}
+function getToday(){return new Date().toISOString().split('T')[0];}
+
+// ─── EXPORT & SHEETS ────────────────────────────────────────────
+function openExport(){
+  const day=dayRec();
+  const P=Object.values(day).filter(v=>v==='P').length;
+  const A=Object.values(day).filter(v=>v==='A').length;
+  const T=Object.values(day).filter(v=>v==='T').length;
+  document.getElementById('exportInfo').textContent=
+    COURSES[currentCourse].label+' · '+currentDate+' — '+P+' presentes, '+A+' ausentes, '+T+' tardanzas.';
+  document.getElementById('exportModal').classList.add('show');
+}
+function closeExport(){document.getElementById('exportModal').classList.remove('show');}
+
+function requirePin(action){
+  const s=getSettings();
+  if(!s.pin){action();return;}
+  pendingAction=action;
+  document.getElementById('pinVerify').value='';
+  document.getElementById('pinModal').classList.add('show');
+}
+function verifyPin(){
+  const s=getSettings();
+  const entered=document.getElementById('pinVerify').value;
+  if(entered===s.pin){closePinModal();pendingAction&&pendingAction();}
+  else{showToast('PIN incorrecto','error');}
+}
+function closePinModal(){document.getElementById('pinModal').classList.remove('show');}
+
+function exportCSV(){
+  closeExport();
+  requirePin(()=>{
+    const day=dayRec();
+    const MAP={P:'Presente',A:'Ausente',T:'Tardanza','':'Sin registro'};
+    const rows=['Curso,Fecha,Matrícula,Número,Nombre,Estado'];
+    COURSES[currentCourse].students.forEach(s=>{
+      rows.push(`${COURSES[currentCourse].label},${currentDate},${s.mat},${s.num},"${s.name}",${MAP[day[s.mat]||'']}`);
+    });
+    const blob=new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`asistencia_${currentCourse}_${currentDate}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('CSV descargado ✓','success');
+  });
+}
+
+async function sendToSheets(){
+  closeExport();
+  const s=getSettings();
+  if(!s.sheetsUrl){
+    showToast('Configura primero la URL del Apps Script','error');
+    openSettings();
+    return;
+  }
+  requirePin(async()=>{
+    const day=dayRec();
+    const MAP={P:'Presente',A:'Ausente',T:'Tardanza','':'Sin registro'};
+    const payload={
+      course:COURSES[currentCourse].label,
+      courseKey:currentCourse,
+      date:currentDate,
+      docente:'Hayzar Hernandez',
+      students:COURSES[currentCourse].students.map(s=>({
+        mat:s.mat,num:s.num,name:s.name,
+        status:MAP[day[s.mat]||'']
+      }))
+    };
+    showToast('Enviando a Google Sheets…','');
+    try{
+      await fetch(s.sheetsUrl,{
+        method:'POST',
+        mode:'no-cors',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload)
+      });
+      showToast('Enviado a Google Sheets ✓','success');
+    }catch(err){
+      showToast('Error de red. Verifica la URL.','error');
+    }
+  });
+}
+
+// ─── SETTINGS ───────────────────────────────────────────────────
+function openSettings(){
+  const s=getSettings();
+  document.getElementById('sheetsUrl').value=s.sheetsUrl||'';
+  document.getElementById('pinInput').value='';
+  document.getElementById('settingsModal').classList.add('show');
+}
+function closeSettings(){document.getElementById('settingsModal').classList.remove('show');}
+
+// ─── TOAST ──────────────────────────────────────────────────────
+function showToast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast show '+(type||'');
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ─── INIT ───────────────────────────────────────────────────────
+loadData();
+const today=getToday();
+const di=document.getElementById('dateInput');
+di.value=today;
+di.addEventListener('change',e=>setDate(e.target.value));
+buildTabs();
+setDate(today);
+</script>
+
+<!--
+=================================================================
+GOOGLE APPS SCRIPT — pega esto en script.google.com
+=================================================================
+
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('Asistencia');
+    if (!sheet) {
+      sheet = ss.insertSheet('Asistencia');
+      sheet.appendRow(['Curso','Fecha','Matrícula','Número','Nombre','Estado','Docente','Enviado']);
+      sheet.setFrozenRows(1);
+      sheet.getRange(1,1,1,8).setFontWeight('bold').setBackground('#1a5fa8').setFontColor('white');
+    }
+    // Elimina filas existentes del mismo curso+fecha para evitar duplicados
+    var lastRow = sheet.getLastRow();
+    if (lastRow > 1) {
+      var vals = sheet.getRange(2, 1, lastRow-1, 2).getValues();
+      for (var i = vals.length-1; i >= 0; i--) {
+        if (vals[i][0] === data.course && vals[i][1] === data.date) {
+          sheet.deleteRow(i+2);
+        }
+      }
+    }
+    // Inserta nuevas filas
+    var ts = Utilities.formatDate(new Date(), 'America/Bogota', 'dd/MM/yyyy HH:mm');
+    data.students.forEach(function(s) {
+      sheet.appendRow([data.course, data.date, s.mat, s.num, s.name, s.status, data.docente||'', ts]);
+    });
+    return ContentService
+      .createTextOutput(JSON.stringify({ok:true, inserted: data.students.length}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ok:false, error: err.message}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+=================================================================
+-->
+</body>
+</html>
